@@ -23,7 +23,7 @@ internal final class ResponseDetectiveSpec: QuickSpec {
 			describe("initial state") {
 
 				it("should use default output facility") {
-					expect(ResponseDetective.outputFacility.dynamicType == ConsoleOutputFacility.self).to(beTruthy())
+					expect(type(of: ResponseDetective.outputFacility) == ConsoleOutputFacility.self).to(beTruthy())
 				}
 
 				it("should use default url protocol class") {

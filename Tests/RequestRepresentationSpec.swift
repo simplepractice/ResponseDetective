@@ -66,11 +66,11 @@ internal final class RequestRepresentationSpec: QuickSpec {
 
 private extension NSMutableURLRequest {
 
-	convenience init(URL: NSURL, HTTPMethod: String, headerFields: [String: String], HTTPBody: NSData?) {
-		self.init(URL: URL)
-		self.HTTPMethod = HTTPMethod
+	convenience init(URL: Foundation.URL, HTTPMethod: String, headerFields: [String: String], HTTPBody: Data?) {
+		self.init(url: URL)
+		self.httpMethod = HTTPMethod
 		self.allHTTPHeaderFields = headerFields
-		self.HTTPBody = HTTPBody
+		self.httpBody = HTTPBody
 	}
 
 }
