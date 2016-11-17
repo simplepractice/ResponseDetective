@@ -15,11 +15,11 @@ internal final class TestRequestInterceptor: RequestInterceptorType {
 
 	// MARK: RequestInterceptorType implementation
 
-	internal func canInterceptRequest(request: RequestRepresentation) -> Bool {
+	internal func canInterceptRequest(_ request: RequestRepresentation) -> Bool {
 		return true
 	}
 
-	internal func interceptRequest(request: RequestRepresentation) {
+	internal func interceptRequest(_ request: RequestRepresentation) {
 		interceptedRequests.append(request)
 	}
 	

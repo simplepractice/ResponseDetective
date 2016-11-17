@@ -19,7 +19,7 @@ internal struct TestImageGenerator {
 
 	/// The image MIME type.
 	internal enum TestImageType {
-		case PNG
+		case png
 	}
 
 	/// Platform-agnostic image size type.
@@ -31,10 +31,10 @@ internal struct TestImageGenerator {
 	/// - parameter size: The image size.
 	///
 	/// - returns: Image data.
-	internal static func generateImageData(type type: TestImageType, size: TestImageSize) -> NSData {
+	internal static func generateImageData(type: TestImageType, size: TestImageSize) -> Data {
 		#if os(iOS)
 			switch type {
-				case .PNG:
+				case .png:
 					return UIImagePNGRepresentation(generateImage(size: size))!
 			}
 		#else
@@ -58,16 +58,16 @@ internal struct TestImageGenerator {
 	/// - parameter size: The size of the image.
 	///
 	/// - returns: The generated image.
-	private static func generateImage(size size: TestImageSize) -> OSImage {
+	fileprivate static func generateImage(size: TestImageSize) -> OSImage {
 		#if os(iOS)
 			let bounds = CGRect(x: 0, y: 0, width: size.width, height: size.height)
 			UIGraphicsBeginImageContext(bounds.size)
 			let context = UIGraphicsGetCurrentContext()
-			CGContextSetFillColorWithColor(context, UIColor.blackColor().CGColor)
-			CGContextFillRect(context, bounds)
+			context?.setFillColor(UIColor.black.cgColor)
+			context?.fill(bounds)
 			let image = UIGraphicsGetImageFromCurrentImageContext()
 			UIGraphicsEndImageContext()
-			return image
+			return image!
 		#else
 			let bounds = NSRect(x: 0, y: 0, width: size.width, height: size.height)
 			let image = NSImage(size: bounds.size)

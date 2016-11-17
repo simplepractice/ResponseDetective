@@ -30,19 +30,18 @@ class HeaderInterceptorSpec: QuickSpec {
 			let fixtureResponseHeadersString = "X-Foo: bar"
 
 			let fixtureRequest = RequestRepresentation( {
-				let mutableRequest = NSMutableURLRequest()
-				mutableRequest.URL = NSURL(string: fixtureRequestURLString)!
-				mutableRequest.HTTPMethod = fixtureRequestMethod
+        var mutableRequest = URLRequest(url: URL(string: fixtureRequestURLString)!)
+				mutableRequest.httpMethod = fixtureRequestMethod
 				for (field, value) in fixtureRequestHeaders {
 					mutableRequest.setValue(value, forHTTPHeaderField: field)
 				}
 				return mutableRequest
 			}())!
 
-			let fixtureResponse = ResponseRepresentation(NSHTTPURLResponse(
-				URL: NSURL(string: fixtureResponseURLString)!,
-				statusCode: fixtureResponseStatusCode,
-				HTTPVersion: "HTTP/1.1",
+			let fixtureResponse = ResponseRepresentation(HTTPURLResponse(
+        url: URL(string: fixtureResponseURLString)!,
+        statusCode: fixtureResponseStatusCode,
+        httpVersion: "HTTP/1.1",
 				headerFields: fixtureResponseHeaders
 			)!, nil)!
 

@@ -19,20 +19,19 @@ class PlainTextInterceptorSpec: QuickSpec {
 			var sut: PlainTextInterceptor!
 			
 			let fixturePlainTextString = "foo-bar-baz"
-			let fixturePlainTextData = fixturePlainTextString.dataUsingEncoding(NSUTF8StringEncoding)
+			let fixturePlainTextData = fixturePlainTextString.data(using: String.Encoding.utf8)
 			
 			let fixtureRequest = RequestRepresentation( {
-				let mutableRequest = NSMutableURLRequest()
-				mutableRequest.URL = NSURL(string: "https://httpbin.org/get")!
+        var mutableRequest = URLRequest(url: URL(string: "https://httpbin.org/get")!)
 				mutableRequest.setValue("text/plain", forHTTPHeaderField: "Content-Type")
-				mutableRequest.HTTPBody = fixturePlainTextData
+				mutableRequest.httpBody = fixturePlainTextData
 				return mutableRequest
 			}())!
 
-			let fixtureResponse = ResponseRepresentation(NSHTTPURLResponse(
-				URL: NSURL(string: "https://httpbin.org/get")!,
-				statusCode: 200,
-				HTTPVersion: "HTTP/1.1",
+			let fixtureResponse = ResponseRepresentation(HTTPURLResponse(
+        url: URL(string: "https://httpbin.org/get")!,
+        statusCode: 200,
+        httpVersion: "HTTP/1.1",
 				headerFields: [
 					"Content-Type": "text/plain"
 				]

@@ -15,11 +15,11 @@ internal final class TestResponseInterceptor: ResponseInterceptorType {
 
 	// MARK: ResponseInterceptorType implementation
 
-	internal func canInterceptResponse(request: ResponseRepresentation) -> Bool {
+	internal func canInterceptResponse(_ request: ResponseRepresentation) -> Bool {
 		return true
 	}
 
-	internal func interceptResponse(response: ResponseRepresentation) {
+	internal func interceptResponse(_ response: ResponseRepresentation) {
 		interceptedResponses.append(response)
 	}
 	

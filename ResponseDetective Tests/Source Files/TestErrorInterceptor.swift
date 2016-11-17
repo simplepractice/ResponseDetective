@@ -15,7 +15,7 @@ internal final class TestErrorInterceptor: ErrorInterceptorType {
 
 	// MARK: ErrorInterceptorType implementation
 
-	internal func interceptError(error: NSError, _ response: ResponseRepresentation?) {
+	internal func interceptError(_ error: NSError, _ response: ResponseRepresentation?) {
 		interceptedErrors.append((error, response))
 	}
 	

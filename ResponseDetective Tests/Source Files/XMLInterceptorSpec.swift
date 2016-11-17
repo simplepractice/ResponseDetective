@@ -19,22 +19,21 @@ class XMLInterceptorSpec: QuickSpec {
 			var sut: XMLInterceptor!
 
 			let uglyFixtureString = "<foo>\t<bar baz=\"qux\">lorem ipsum</bar\n></foo>"
-			let uglyFixtureData = uglyFixtureString.dataUsingEncoding(NSUTF8StringEncoding)!
+			let uglyFixtureData = uglyFixtureString.data(using: String.Encoding.utf8)!
 			let prettyFixtureString = "<?xml version=\"1.0\"?>\n<foo>\n  <bar baz=\"qux\">lorem ipsum</bar>\n</foo>"
 
 			let fixtureRequest = RequestRepresentation( {
-				let mutableRequest = NSMutableURLRequest()
-				mutableRequest.URL = NSURL(string: "https://httpbin.org/post")!
-				mutableRequest.HTTPMethod = "POST"
+        var mutableRequest = URLRequest(url: URL(string: "https://httpbin.org/post")!)
+				mutableRequest.httpMethod = "POST"
 				mutableRequest.setValue("application/xml", forHTTPHeaderField: "Content-Type")
-				mutableRequest.HTTPBody = uglyFixtureData
+				mutableRequest.httpBody = uglyFixtureData
 				return mutableRequest
 			}())!
 
-			let fixtureResponse = ResponseRepresentation(NSHTTPURLResponse(
-				URL: NSURL(string: "https://httpbin.org/post")!,
-				statusCode: 200,
-				HTTPVersion: "HTTP/1.1",
+			let fixtureResponse = ResponseRepresentation(HTTPURLResponse(
+        url: URL(string: "https://httpbin.org/post")!,
+        statusCode: 200,
+        httpVersion: "HTTP/1.1",
 				headerFields: [
 					"Content-Type": "text/xml"
 				]
