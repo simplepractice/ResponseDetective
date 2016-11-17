@@ -29,7 +29,7 @@ import Foundation
 	
 	// MARK: Interceptors
 	
-	/// Incercepts the given request and passes it to the ResponseDetective
+	/// Intercepts the given request and passes it to the ResponseDetective
 	/// instance.
 	///
 	/// - Parameter request: The intercepted request.
@@ -61,7 +61,7 @@ import Foundation
 		}
 	}
 
-	/// Incercepts the given response and passes it to the ResponseDetective
+	/// Intercepts the given response and passes it to the ResponseDetective
 	/// instance.
 	///
 	/// - Parameters:
@@ -75,7 +75,7 @@ import Foundation
 		ResponseDetective.outputFacility.outputResponseRepresentation(responseRepresentation)
 	}
 	
-	/// Incercepts the given error and passes it to the ResponseDetective
+	/// Intercepts the given error and passes it to the ResponseDetective
 	/// instance.
 	///
 	/// - Parameters:
@@ -105,7 +105,7 @@ import Foundation
 	
 	internal override static func canInit(with request: URLRequest) -> Bool {
 		guard let URL = request.url, let scheme = URL.scheme else { return false }
-		return ["http", "https"].contains(scheme) && ResponseDetective.canIncerceptRequest(request)
+		return ["http", "https"].contains(scheme) && ResponseDetective.canInterceptRequest(request)
 	}
 	
 	internal override static func canonicalRequest(for request: URLRequest) -> URLRequest {

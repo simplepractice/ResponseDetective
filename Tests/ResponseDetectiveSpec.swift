@@ -54,7 +54,7 @@ internal final class ResponseDetectiveSpec: QuickSpec {
 
 					it("should not ignore the request") {
 						expect {
-							ResponseDetective.canIncerceptRequest(request)
+							ResponseDetective.canInterceptRequest(request)
 						}.to(beTruthy())
 					}
 
@@ -73,7 +73,7 @@ internal final class ResponseDetectiveSpec: QuickSpec {
 
 					it("should ignore the request") {
 						expect {
-							ResponseDetective.canIncerceptRequest(request)
+							ResponseDetective.canInterceptRequest(request)
 						}.to(beFalsy())
 					}
 

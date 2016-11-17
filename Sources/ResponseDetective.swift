@@ -56,12 +56,12 @@ import Foundation
 		requestPredicates.append(predicate)
 	}
 	
-	/// Checks whether the given request can be incercepted.
+	/// Checks whether the given request can be intercepted.
 	///
 	/// - Parameter request: The request to check.
 	///
 	/// - Returns: `true` if request can be intercepted, `false` otherwise.
-	public static func canIncerceptRequest(_ request: URLRequest) -> Bool {
+	public static func canInterceptRequest(_ request: URLRequest) -> Bool {
 		return requestPredicates.reduce(true) {
 			return $0 && !$1.evaluate(with: request)
 		}
