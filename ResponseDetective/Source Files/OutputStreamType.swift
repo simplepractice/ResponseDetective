@@ -10,6 +10,6 @@ public protocol OutputStreamType {
 	/// Append the given string to this stream.
 	///
 	/// - parameter string: The string to append.
-	func write(string: String)
+	func write(_ string: String)
 	
 }

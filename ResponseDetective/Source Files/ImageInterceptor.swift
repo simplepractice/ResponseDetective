@@ -18,7 +18,7 @@ import Foundation
 public final class ImageInterceptor {
 
 	/// The output stream used by the interceptor.
-	public private(set) var outputStream: OutputStreamType
+	public fileprivate(set) var outputStream: OutputStreamType
 
 	// MARK: Initialization
 
@@ -41,7 +41,7 @@ public final class ImageInterceptor {
 	/// - parameter image: An image from which to extract metadata.
 	///
 	/// - returns: A metadata string.
-	private func extractMetadataFromImage(contentType: String, _ image: OSImage) -> String {
+	fileprivate func extractMetadataFromImage(_ contentType: String, _ image: OSImage) -> String {
 		return "\(contentType) (\(Int(image.size.width))px × \(Int(image.size.height))px)"
 	}
 
@@ -50,7 +50,7 @@ public final class ImageInterceptor {
 	/// - parameter data: Image data from which to extract metadata.
 	///
 	/// - returns: A metadata string.
-	private func extractMetadataFromImageData(contentType: String, _ data: NSData) -> String? {
+	fileprivate func extractMetadataFromImageData(_ contentType: String, _ data: Data) -> String? {
 		return Optional(data).flatMap({
 			#if os(iOS)
 				return UIImage(data: $0)
@@ -70,18 +70,18 @@ extension ImageInterceptor: ResponseInterceptorType {
 
 	// MARK: ResponseInterceptorType implementation
 
-	public func canInterceptResponse(response: ResponseRepresentation) -> Bool {
+	public func canInterceptResponse(_ response: ResponseRepresentation) -> Bool {
 		return response.contentType.map {
-			(($0 as NSString).substringToIndex(6) as String) == "image/"
+			(($0 as NSString).substring(to: 6) as String) == "image/"
 		} ?? false
 	}
 
-	public func interceptResponse(response: ResponseRepresentation) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-			if let contentType = response.contentType, metadataString = response.bodyData.flatMap({
-				self.extractMetadataFromImageData(contentType, $0)
+	public func interceptResponse(_ response: ResponseRepresentation) {
+		DispatchQueue.global(qos: .default).async {
+			if let contentType = response.contentType, let metadataString = response.bodyData.flatMap({
+				self.extractMetadataFromImageData(contentType, $0 as Data)
 		    }) {
-				dispatch_async(dispatch_get_main_queue()) {
+				DispatchQueue.main.async {
 					self.outputStream.write(metadataString)
 				}
 			}

@@ -6,28 +6,28 @@
 
 import Foundation
 
-@objc(RDVIntercetingProtocol) public final class InterceptingProtocol: NSURLProtocol, NSURLSessionDataDelegate, NSURLSessionTaskDelegate {
+@objc(RDVIntercetingProtocol) public final class InterceptingProtocol: URLProtocol, URLSessionDataDelegate, URLSessionTaskDelegate {
 
 	/// Request interceptors store.
-	public private(set) static var requestInterceptors = [RequestInterceptorType]()
+	public fileprivate(set) static var requestInterceptors = [RequestInterceptorType]()
 
 	/// Response interceptors store.
-	public private(set) static var responseInterceptors = [ResponseInterceptorType]()
+	public fileprivate(set) static var responseInterceptors = [ResponseInterceptorType]()
 	
 	/// Error interceptors store.
-	public private(set) static var errorInterceptors = [ErrorInterceptorType]()
+	public fileprivate(set) static var errorInterceptors = [ErrorInterceptorType]()
 
 	/// Private under-the-hood session object.
-	private var session: NSURLSession!
+	fileprivate var session: Foundation.URLSession!
 
 	/// Private under-the-hood session task.
-	private var sessionTask: NSURLSessionDataTask!
+	fileprivate var sessionTask: URLSessionDataTask!
 	
 	/// Private under-the-hood response object
-	private var response: NSHTTPURLResponse?
+	fileprivate var response: HTTPURLResponse?
 	
 	/// Private under-the-hood response data object.
-	private lazy var responseData = NSMutableData()
+	fileprivate lazy var responseData = NSMutableData()
 
 	// MARK: Interceptor registration
 
@@ -37,7 +37,7 @@ import Foundation
 	///
 	/// - returns: A unique token which can be used for removing that request
 	/// interceptor.
-	public static func registerRequestInterceptor(interceptor: RequestInterceptorType) {
+	public static func registerRequestInterceptor(_ interceptor: RequestInterceptorType) {
 		requestInterceptors.append(interceptor)
 	}
 
@@ -47,7 +47,7 @@ import Foundation
 	///
 	/// - returns: A unique token which can be used for removing that response
 	/// interceptor.
-	public static func registerResponseInterceptor(interceptor: ResponseInterceptorType) {
+	public static func registerResponseInterceptor(_ interceptor: ResponseInterceptorType) {
 		responseInterceptors.append(interceptor)
 	}
 	
@@ -57,7 +57,7 @@ import Foundation
 	///
 	/// - returns: A unique token which can be used for removing that error
 	/// interceptor.
-	public static func registerErrorInterceptor(interceptor: ErrorInterceptorType) {
+	public static func registerErrorInterceptor(_ interceptor: ErrorInterceptorType) {
 		errorInterceptors.append(interceptor)
 	}
 
@@ -65,7 +65,7 @@ import Foundation
 	///
 	/// - parameter removalToken: The removal token obtained when registering the
 	/// request interceptor.
-	public static func unregisterRequestInterceptor(interceptor: RequestInterceptorType) {
+	public static func unregisterRequestInterceptor(_ interceptor: RequestInterceptorType) {
 		requestInterceptors = requestInterceptors.filter({ $0 !== interceptor })
 	}
 
@@ -73,7 +73,7 @@ import Foundation
 	///
 	/// - parameter removalToken: The removal token obtained when registering the
 	/// response interceptor.
-	public static func unregisterResponseInterceptor(interceptor: ResponseInterceptorType) {
+	public static func unregisterResponseInterceptor(_ interceptor: ResponseInterceptorType) {
 		responseInterceptors = responseInterceptors.filter({ $0 !== interceptor })
 	}
 	
@@ -81,7 +81,7 @@ import Foundation
 	///
 	/// - parameter removalToken: The removal token obtained when registering the
 	/// error interceptor.
-	public static func unregisterErrorInterceptor(interceptor: ErrorInterceptorType) {
+	public static func unregisterErrorInterceptor(_ interceptor: ErrorInterceptorType) {
 		errorInterceptors = errorInterceptors.filter({ $0 !== interceptor })
 	}
 
@@ -90,7 +90,7 @@ import Foundation
 	/// Propagates the request interception.
 	///
 	/// - parameter request: The intercepted request.
-	private func propagateRequestInterception(request: NSURLRequest) {
+	fileprivate func propagateRequestInterception(_ request: URLRequest) {
 		if let representation = RequestRepresentation(request) {
 			for interceptor in InterceptingProtocol.requestInterceptors {
 				if interceptor.canInterceptRequest(representation) {
@@ -104,7 +104,7 @@ import Foundation
 	///
 	/// - parameter request: The intercepted response.
 	/// - parameter data: The intercepted response data.
-	private func propagateResponseInterception(response: NSHTTPURLResponse, _ data: NSData) {
+	fileprivate func propagateResponseInterception(_ response: HTTPURLResponse, _ data: Data) {
 		if let representation = ResponseRepresentation(response, data) {
 			for interceptor in InterceptingProtocol.responseInterceptors {
 				if interceptor.canInterceptResponse(representation) {
@@ -119,8 +119,8 @@ import Foundation
 	/// - parameter error: The intercepted response error.
 	/// - parameter response: The intercepted response (if any).
 	/// - parameter error: The error which occured during the request.
-	private func propagateResponseErrorInterception(response: NSHTTPURLResponse?, _ data: NSData?, _ error: NSError) {
-		if let response = response, representation = ResponseRepresentation(response, data) {
+	fileprivate func propagateResponseErrorInterception(_ response: HTTPURLResponse?, _ data: Data?, _ error: NSError) {
+		if let response = response, let representation = ResponseRepresentation(response, data) {
 			for interceptor in InterceptingProtocol.errorInterceptors {
 				interceptor.interceptError(error, representation)
 			}
@@ -129,17 +129,17 @@ import Foundation
 
 	// MARK: NSURLProtocol overrides
 	
-	public override init(request: NSURLRequest, cachedResponse: NSCachedURLResponse?, client: NSURLProtocolClient?) {
+	public override init(request: URLRequest, cachedResponse: CachedURLResponse?, client: URLProtocolClient?) {
 		super.init(request: request, cachedResponse: cachedResponse, client: client)
-		session = NSURLSession(configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(), delegate: self, delegateQueue: nil)
-		sessionTask = session.dataTaskWithRequest(request)
+		session = Foundation.URLSession(configuration: URLSessionConfiguration.ephemeral, delegate: self, delegateQueue: nil)
+		sessionTask = session.dataTask(with: request)
 	}
 
-	public override static func canInitWithRequest(request: NSURLRequest) -> Bool {
+	public override static func canInit(with request: URLRequest) -> Bool {
 		return true
 	}
 
-	public override static func canonicalRequestForRequest(request: NSURLRequest) -> NSURLRequest {
+	public override static func canonicalRequest(for request: URLRequest) -> URLRequest {
 		return request
 	}
 
@@ -154,29 +154,29 @@ import Foundation
 
 	// MARK: NSURLSessionDataDelegate methods
 	
-	public func URLSession(session: NSURLSession, dataTask: NSURLSessionDataTask, didReceiveResponse response: NSURLResponse, completionHandler: (NSURLSessionResponseDisposition) -> Void) {
-		client?.URLProtocol(self, didReceiveResponse: response, cacheStoragePolicy:NSURLCacheStoragePolicy.Allowed)
-		completionHandler(.Allow)
-		if let response = response as? NSHTTPURLResponse {
+	public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+		client?.urlProtocol(self, didReceive: response, cacheStoragePolicy:URLCache.StoragePolicy.allowed)
+		completionHandler(.allow)
+		if let response = response as? HTTPURLResponse {
 			self.response = response
 		}
 	}
 	
-	public func URLSession(session: NSURLSession, dataTask: NSURLSessionDataTask, didReceiveData data: NSData) {
-		client?.URLProtocol(self, didLoadData: data)
-		responseData.appendData(data)
+	public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+		client?.urlProtocol(self, didLoad: data)
+		responseData.append(data)
 	}
 
 	// MARK: NSURLSessionTaskDelegate methods
 	
-	public func URLSession(session: NSURLSession, task: NSURLSessionTask, didCompleteWithError error: NSError?) {
+	public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
 		if let error = error {
-			client?.URLProtocol(self, didFailWithError: error)
-			propagateResponseErrorInterception(response, responseData, error)
+			client?.urlProtocol(self, didFailWithError: error)
+			propagateResponseErrorInterception(response, responseData as Data, error as NSError)
 		}
-		client?.URLProtocolDidFinishLoading(self)
+		client?.urlProtocolDidFinishLoading(self)
 		if let response = self.response {
-			propagateResponseInterception(response, responseData)
+			propagateResponseInterception(response, responseData as Data)
 		}
 	}
 }
@@ -186,14 +186,14 @@ import Foundation
 public extension InterceptingProtocol {
 	
 	static func unregisterAllRequestInterceptors() {
-		requestInterceptors.removeAll(keepCapacity: false)
+		requestInterceptors.removeAll(keepingCapacity: false)
 	}
 	
 	static func unregisterAllResponseInterceptors() {
-		responseInterceptors.removeAll(keepCapacity: false)
+		responseInterceptors.removeAll(keepingCapacity: false)
 	}
 	
 	static func unregisterAllErrorInterceptors() {
-		errorInterceptors.removeAll(keepCapacity: false)
+		errorInterceptors.removeAll(keepingCapacity: false)
 	}
 }

@@ -10,10 +10,10 @@ import Foundation
 public final class JSONInterceptor {
 
 	/// The output stream used by the interceptor.
-	public private(set) var outputStream: OutputStreamType
+	public fileprivate(set) var outputStream: OutputStreamType
 
 	// The acceptable content types.
-	private let acceptableContentTypes = [
+	fileprivate let acceptableContentTypes = [
 		"application/json"
 	]
 
@@ -38,13 +38,13 @@ public final class JSONInterceptor {
 	/// - parameter data: The JSON data to prettify.
 	///
 	/// - returns: A prettified JSON string.
-	private func prettifyJSONData(data: NSData) -> String? {
+	fileprivate func prettifyJSONData(_ data: Data) -> String? {
 		return Optional(data).flatMap({
-			try? NSJSONSerialization.JSONObjectWithData($0, options: [])
+			try? JSONSerialization.jsonObject(with: $0, options: [])
 		}).flatMap({
-			try? NSJSONSerialization.dataWithJSONObject($0, options: .PrettyPrinted)
+			try? JSONSerialization.data(withJSONObject: $0, options: .prettyPrinted)
 		}).flatMap({
-			NSString(data: $0, encoding: NSUTF8StringEncoding) as? String
+			NSString(data: $0, encoding: String.Encoding.utf8.rawValue) as? String
 		})
 	}
 
@@ -53,16 +53,16 @@ public final class JSONInterceptor {
 	/// - parameter stream: The JSON data stream to prettify.
 	///
 	/// - returns: A prettified JSON stream.
-	private func prettifyJSONStream(stream: NSInputStream) -> String? {
+	fileprivate func prettifyJSONStream(_ stream: InputStream) -> String? {
 		return Optional(stream).flatMap({
 			stream.open()
-			let object: AnyObject? = try? NSJSONSerialization.JSONObjectWithStream($0, options: [])
+			let object: AnyObject? = try! JSONSerialization.jsonObject(with: $0, options: []) as AnyObject?
 			stream.close()
 			return object
 		}).flatMap({
-			try? NSJSONSerialization.dataWithJSONObject($0, options: .PrettyPrinted)
+			try? JSONSerialization.data(withJSONObject: $0, options: .prettyPrinted)
 		}).flatMap({
-			NSString(data: $0, encoding: NSUTF8StringEncoding) as? String
+			NSString(data: $0, encoding: String.Encoding.utf8.rawValue) as? String
 		})
 	}
 
@@ -74,16 +74,16 @@ extension JSONInterceptor: RequestInterceptorType {
 
 	// MARK: RequestInterceptorType implementation
 
-	public func canInterceptRequest(request: RequestRepresentation) -> Bool {
+	public func canInterceptRequest(_ request: RequestRepresentation) -> Bool {
 		return request.contentType.map {
 			self.acceptableContentTypes.contains($0)
 		} ?? false
 	}
 
-	public func interceptRequest(request: RequestRepresentation) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+	public func interceptRequest(_ request: RequestRepresentation) {
+		DispatchQueue.global(qos: .default).async {
 			if let jsonString = request.bodyStream.flatMap({ self.prettifyJSONStream($0) }) {
-				dispatch_async(dispatch_get_main_queue()) {
+				DispatchQueue.main.async {
 					self.outputStream.write(jsonString)
 				}
 			}
@@ -98,16 +98,16 @@ extension JSONInterceptor: ResponseInterceptorType {
 
 	// MARK: ResponseInterceptorType implementation
 
-	public func canInterceptResponse(response: ResponseRepresentation) -> Bool {
+	public func canInterceptResponse(_ response: ResponseRepresentation) -> Bool {
 		return response.contentType.map {
 			self.acceptableContentTypes.contains($0)
 		} ?? false
 	}
 
-	public func interceptResponse(response: ResponseRepresentation) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-			if let jsonString = response.bodyData.flatMap({ self.prettifyJSONData($0) }) {
-				dispatch_async(dispatch_get_main_queue()) {
+	public func interceptResponse(_ response: ResponseRepresentation) {
+		DispatchQueue.global(qos: .default).async {
+			if let jsonString = response.bodyData.flatMap({ self.prettifyJSONData($0 as Data) }) {
+				DispatchQueue.main.async {
 					self.outputStream.write(jsonString)
 				}
 			}

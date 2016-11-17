@@ -16,13 +16,13 @@ public protocol RequestInterceptorType: class {
 	///
 	/// - returns: A boolean indicating whether the request should be
 	/// intercepted and processed.
-	func canInterceptRequest(request: RequestRepresentation) -> Bool
+	func canInterceptRequest(_ request: RequestRepresentation) -> Bool
 
 	/// Intercepts and processes the outgoing request. Preferably, all side
 	/// effects should be executed asynchronously, so that the request doesn't
 	/// get blocked.
 	///
 	/// - parameter request: The request to be processed.
-	func interceptRequest(request: RequestRepresentation)
+	func interceptRequest(_ request: RequestRepresentation)
 
 }

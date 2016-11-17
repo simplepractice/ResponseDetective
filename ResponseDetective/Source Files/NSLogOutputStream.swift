@@ -13,7 +13,7 @@ public final class NSLogOutputStream: OutputStreamType {
 
 	// MARK: OutputStreamType implementation
 
-	public func write(string: String) {
+	public func write(_ string: String) {
 		NSLog("%@", string)
 	}
 	

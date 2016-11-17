@@ -16,6 +16,6 @@ public protocol ErrorInterceptorType: class {
 	///
 	/// - parameter error: The received error.
 	/// - parameter response: The response received along the error (if any).
-	func interceptError(error: NSError, _ response: ResponseRepresentation?)
+	func interceptError(_ error: NSError, _ response: ResponseRepresentation?)
 	
 }

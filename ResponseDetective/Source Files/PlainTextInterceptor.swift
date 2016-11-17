@@ -10,10 +10,10 @@ import Foundation
 public final class PlainTextInterceptor {
 	
 	/// The output stream used by the interceptor.
-	public private(set) var outputStream: OutputStreamType
+	public fileprivate(set) var outputStream: OutputStreamType
 	
 	// The acceptable content types.
-	private let acceptableContentTypes = [
+	fileprivate let acceptableContentTypes = [
 		"text/plain"
 	]
 	
@@ -38,9 +38,9 @@ public final class PlainTextInterceptor {
 	/// - parameter data: The plain text data to prettify.
 	///
 	/// - returns: A prettified plain text string.
-	private func prettifyPlainTextData(data: NSData) -> String? {
+	fileprivate func prettifyPlainTextData(_ data: Data) -> String? {
 		return Optional(data).flatMap {
-			NSString(data: $0, encoding: NSUTF8StringEncoding) as String?
+			NSString(data: $0, encoding: String.Encoding.utf8.rawValue) as String?
 		}
 	}
 }
@@ -51,18 +51,18 @@ extension PlainTextInterceptor: RequestInterceptorType {
 	
 	// MARK: RequestInterceptorType implementation
 	
-	public func canInterceptRequest(request: RequestRepresentation) -> Bool {
+	public func canInterceptRequest(_ request: RequestRepresentation) -> Bool {
 		return request.contentType.map {
 			self.acceptableContentTypes.contains($0)
 		} ?? false
 	}
 	
-	public func interceptRequest(request: RequestRepresentation) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+	public func interceptRequest(_ request: RequestRepresentation) {
+		DispatchQueue.global(qos: .default).async {
 			if let plainTextString = request.bodyData.flatMap({
-				self.prettifyPlainTextData($0)
+				self.prettifyPlainTextData($0 as Data)
 			}) {
-				dispatch_async(dispatch_get_main_queue()) {
+				DispatchQueue.main.async {
 					self.outputStream.write(plainTextString)
 				}
 			}
@@ -77,18 +77,18 @@ extension PlainTextInterceptor: ResponseInterceptorType {
 	
 	// MARK: ResponseInterceptorType implementation
 	
-	public func canInterceptResponse(response: ResponseRepresentation) -> Bool {
+	public func canInterceptResponse(_ response: ResponseRepresentation) -> Bool {
 		return response.contentType.map {
 			self.acceptableContentTypes.contains($0)
 		} ?? false
 	}
 	
-	public func interceptResponse(response: ResponseRepresentation) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+	public func interceptResponse(_ response: ResponseRepresentation) {
+		DispatchQueue.global(qos: .default).async {
 			if let plainTextString = response.bodyData.flatMap({
-				self.prettifyPlainTextData($0)
+				self.prettifyPlainTextData($0 as Data)
 			}) {
-				dispatch_async(dispatch_get_main_queue()) {
+				DispatchQueue.main.async {
 					self.outputStream.write(plainTextString)
 				}
 			}

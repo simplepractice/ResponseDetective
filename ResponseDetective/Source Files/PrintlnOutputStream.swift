@@ -10,7 +10,7 @@ public final class PrintlnOutputStream: OutputStreamType {
 
 	// MARK: OutputStreamType implementation
 
-	public func write(string: String) {
+	public func write(_ string: String) {
 		print(string)
 	}
 

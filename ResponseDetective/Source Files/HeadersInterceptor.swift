@@ -11,10 +11,10 @@ import Foundation
 public final class HeadersInterceptor {
 
 	/// The output stream used by the interceptor.
-	public private(set) var outputStream: OutputStreamType
+	public fileprivate(set) var outputStream: OutputStreamType
 
 	// The acceptable content types.
-	private let acceptableContentTypes = [
+	fileprivate let acceptableContentTypes = [
 		"application/json"
 	]
 
@@ -40,16 +40,16 @@ extension HeadersInterceptor: RequestInterceptorType {
 
 	// MARK: RequestInterceptorType implementation
 
-	public func canInterceptRequest(request: RequestRepresentation) -> Bool {
+	public func canInterceptRequest(_ request: RequestRepresentation) -> Bool {
 		return true
 	}
 
-	public func interceptRequest(request: RequestRepresentation) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+	public func interceptRequest(_ request: RequestRepresentation) {
+		DispatchQueue.global(qos: .default).async {
 			let headersString = (request.headers.map({ (key, value) in
 				"\(key): \(value)"
-			}) as NSArray).componentsJoinedByString("\n") as String
-			dispatch_async(dispatch_get_main_queue()) {
+			}) as NSArray).componentsJoined(by: "\n") as String
+			DispatchQueue.main.async {
 				self.outputStream.write("\(request.method) \(request.url)")
 				self.outputStream.write(headersString)
 			}
@@ -64,17 +64,17 @@ extension HeadersInterceptor: ResponseInterceptorType {
 
 	// MARK: ResponseInterceptorType implementation
 
-	public func canInterceptResponse(response: ResponseRepresentation) -> Bool {
+	public func canInterceptResponse(_ response: ResponseRepresentation) -> Bool {
 		return true
 	}
 
-	public func interceptResponse(response: ResponseRepresentation) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+	public func interceptResponse(_ response: ResponseRepresentation) {
+		DispatchQueue.global(qos: .default).async {
 			let headersString = (response.headers.map({ (key, value) in
 				"\(key): \(value)"
-			}) as NSArray).componentsJoinedByString("\n") as String
-			dispatch_async(dispatch_get_main_queue()) {
-				self.outputStream.write("\(response.statusCode) \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
+			}) as NSArray).componentsJoined(by: "\n") as String
+			DispatchQueue.main.async {
+				self.outputStream.write("\(response.statusCode) \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode))")
 				self.outputStream.write(headersString)
 			}
 		}
@@ -88,18 +88,18 @@ extension HeadersInterceptor: ErrorInterceptorType {
 
 	// MARK: ErrorInterceptorType implementation
 
-	public func interceptError(error: NSError, _ response: ResponseRepresentation?) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+	public func interceptError(_ error: NSError, _ response: ResponseRepresentation?) {
+		DispatchQueue.global(qos: .default).async {
 			if let response = response {
 				let headersString = (response.headers.map({ (key, value) in
 					"\(key): \(value)"
-				}) as NSArray).componentsJoinedByString("\n") as String
-				dispatch_async(dispatch_get_main_queue()) {
-					self.outputStream.write("\(response.statusCode) \(NSHTTPURLResponse.localizedStringForStatusCode(response.statusCode))")
+				}) as NSArray).componentsJoined(by: "\n") as String
+				DispatchQueue.main.async {
+					self.outputStream.write("\(response.statusCode) \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode))")
 					self.outputStream.write(headersString)
 				}
 			}
-			dispatch_async(dispatch_get_main_queue()) {
+			DispatchQueue.main.async {
 				self.outputStream.write(error.description)
 			}
 		}

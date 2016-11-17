@@ -10,10 +10,10 @@ import Foundation
 public final class HTMLInterceptor {
 
 	/// The output stream used by the interceptor.
-	public private(set) var outputStream: OutputStreamType
+	public fileprivate(set) var outputStream: OutputStreamType
 
 	// The acceptable content types.
-	private let acceptableContentTypes = [
+	fileprivate let acceptableContentTypes = [
 		"text/html"
 	]
 
@@ -38,7 +38,7 @@ public final class HTMLInterceptor {
 	/// - parameter string: The HTML string to prettify.
 	///
 	/// - returns: A prettified HTML string.
-	private func prettifyHTMLString(string: String) -> String? {
+	fileprivate func prettifyHTMLString(_ string: String) -> String? {
 		return rdv_prettifyHTMLString(string)
 	}
 
@@ -47,9 +47,9 @@ public final class HTMLInterceptor {
 	/// - parameter data: The HTML data to prettify.
 	///
 	/// - returns: A prettified HTML string.
-	private func prettifyHTMLData(data: NSData) -> String? {
+	fileprivate func prettifyHTMLData(_ data: Data) -> String? {
 		return Optional(data).flatMap({
-			NSString(data: $0, encoding: NSUTF8StringEncoding) as String?
+			NSString(data: $0, encoding: String.Encoding.utf8.rawValue) as String?
 		}).flatMap({
 			self.prettifyHTMLString($0)
 		})
@@ -63,18 +63,18 @@ extension HTMLInterceptor: RequestInterceptorType {
 
 	// MARK: RequestInterceptorType implementation
 
-	public func canInterceptRequest(request: RequestRepresentation) -> Bool {
+	public func canInterceptRequest(_ request: RequestRepresentation) -> Bool {
 		return request.contentType.map {
 			self.acceptableContentTypes.contains($0)
 		} ?? false
 	}
 
-	public func interceptRequest(request: RequestRepresentation) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+	public func interceptRequest(_ request: RequestRepresentation) {
+    DispatchQueue.global(qos: .default).async {
 			if let HTMLString = request.bodyData.flatMap({
-				self.prettifyHTMLData($0)
+				self.prettifyHTMLData($0 as Data)
 			}) {
-				dispatch_async(dispatch_get_main_queue()) {
+				DispatchQueue.main.async {
 					self.outputStream.write(HTMLString)
 				}
 			}
@@ -89,18 +89,18 @@ extension HTMLInterceptor: ResponseInterceptorType {
 
 	// MARK: ResponseInterceptorType implementation
 
-	public func canInterceptResponse(response: ResponseRepresentation) -> Bool {
+	public func canInterceptResponse(_ response: ResponseRepresentation) -> Bool {
 		return response.contentType.map {
 			self.acceptableContentTypes.contains($0)
 		} ?? false
 	}
 
-	public func interceptResponse(response: ResponseRepresentation) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+	public func interceptResponse(_ response: ResponseRepresentation) {
+		DispatchQueue.global(qos: .default).async {
 			if let HTMLString = response.bodyData.flatMap({
-				self.prettifyHTMLData($0)
+				self.prettifyHTMLData($0 as Data)
 			}) {
-				dispatch_async(dispatch_get_main_queue()) {
+				DispatchQueue.main.async {
 					self.outputStream.write(HTMLString)
 				}
 			}

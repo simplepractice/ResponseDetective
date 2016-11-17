@@ -24,28 +24,28 @@ public final class RequestRepresentation {
 	}
 
 	/// Request body input stream.
-	public let bodyStream: NSInputStream?
+	public let bodyStream: InputStream?
 
 	/// Request body data. Most requests will have only a stream available, so
 	/// accessing this property will lazily open the stream and drain it in a
 	/// thread-blocking manner.
-	public var bodyData: NSData? {
+	public var bodyData: Data? {
 		return bodyStream.flatMap { stream in
 			let data = NSMutableData()
 			stream.open()
 			while stream.hasBytesAvailable {
-				var buffer = [UInt8](count: 1024, repeatedValue: 0)
+				var buffer = [UInt8](repeating: 0, count: 1024)
 				let length = stream.read(&buffer, maxLength: buffer.count)
-				data.appendBytes(buffer, length: length)
+				data.append(buffer, length: length)
 			}
 			stream.close()
-			return data
+			return data as Data
 		}
 	}
 
 	/// Request body UTF-8 string.
 	public var bodyUTF8String: String? {
-		return bodyData.flatMap { NSString(data: $0, encoding: NSUTF8StringEncoding) } as String?
+		return bodyData.flatMap { NSString(data: $0, encoding: String.Encoding.utf8.rawValue) } as String?
 	}
 
 	/// Initializes the receiver with an instance of NSURLRequest.
@@ -54,15 +54,15 @@ public final class RequestRepresentation {
 	///
 	/// - returns: An initialized receiver or nil if an instance should not be
 	/// created using the given request.
-	public init?(_ request: NSURLRequest) {
-		if let url = request.URL?.absoluteString {
-			self.method = request.HTTPMethod ?? "GET"
+	public init?(_ request: URLRequest) {
+		if let url = request.url?.absoluteString {
+			self.method = request.httpMethod ?? "GET"
 			self.url = url
 			self.headers = request.allHTTPHeaderFields ?? [:]
 			self.bodyStream = {
-				if let bodyData = request.HTTPBody {
-					return NSInputStream(data: bodyData)
-				} else if let bodyStream = request.HTTPBodyStream {
+				if let bodyData = request.httpBody {
+					return InputStream(data: bodyData)
+				} else if let bodyStream = request.httpBodyStream {
 					return bodyStream
 				} else {
 					return nil

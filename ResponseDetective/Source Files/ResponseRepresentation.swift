@@ -14,7 +14,7 @@ public final class ResponseRepresentation {
 
 	/// Response status string.
 	public var statusString: String {
-		return NSHTTPURLResponse.localizedStringForStatusCode(statusCode).uppercaseString as String
+		return HTTPURLResponse.localizedString(forStatusCode: statusCode).uppercased() as String
 	}
 
 	/// Response URL.
@@ -26,18 +26,18 @@ public final class ResponseRepresentation {
 	/// Response content type.
 	public var contentType: String? {
 		return headers["Content-Type"].map({
-			$0.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+			$0.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 		}).map({
-			$0.substringToIndex($0.rangeOfString(";")?.endIndex ?? $0.endIndex)
+			$0.substring(to: $0.range(of: ";")?.upperBound ?? $0.endIndex)
 		})
 	}
 
 	/// Response body data.
-	public let bodyData: NSData?
+	public let bodyData: Data?
 
 	/// Response body UTF-8 string.
 	public var bodyUTF8String: String? {
-		return bodyData.flatMap { NSString(data: $0, encoding: NSUTF8StringEncoding) } as String?
+		return bodyData.flatMap { NSString(data: $0, encoding: String.Encoding.utf8.rawValue) } as String?
 	}
 
 	/// Initializes the receiver with an instance of NSHTTPURLResponse.
@@ -47,15 +47,16 @@ public final class ResponseRepresentation {
 	///
 	/// - returns: An initialized receiver or nil if an instance should not be
 	/// created using the given response.
-	public init?(_ response: NSHTTPURLResponse, _ data: NSData?) {
-		if let url = response.URL?.absoluteString {
+	public init?(_ response: HTTPURLResponse, _ data: Data?) {
+		if let url = response.url?.absoluteString {
 			self.statusCode = response.statusCode
 			self.url = url
-			self.headers = response.allHeaderFields.reduce([:]) { (var initial, element) in
-				if let key = element.0 as? String, value = element.1 as? String {
-					initial[key] = value
+			self.headers = response.allHeaderFields.reduce([:]) { (initial, element) in
+        var _initial = initial
+				if let key = element.0 as? String, let value = element.1 as? String {
+					_initial[key] = value
 				}
-				return initial
+				return _initial
 			}
 			self.bodyData = data
 		} else {

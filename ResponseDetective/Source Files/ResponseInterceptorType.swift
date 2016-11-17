@@ -14,13 +14,13 @@ public protocol ResponseInterceptorType: class {
 	///
 	/// - returns: A boolean indicating whether the response should be
 	/// intercepted and processed.
-	func canInterceptResponse(response: ResponseRepresentation) -> Bool
+	func canInterceptResponse(_ response: ResponseRepresentation) -> Bool
 
 	/// Intercepts and processes the incoming response. Preferably, all side
 	/// effects should be executed asynchronously, so that the response doesn't
 	/// get blocked.
 	///
 	/// - parameter response: The response to be processed.
-	func interceptResponse(response: ResponseRepresentation)
+	func interceptResponse(_ response: ResponseRepresentation)
 
 }

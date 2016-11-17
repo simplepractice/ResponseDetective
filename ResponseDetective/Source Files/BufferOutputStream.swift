@@ -8,7 +8,7 @@
 public final class BufferOutputStream: OutputStreamType {
 
 	/// The buffer array containing all the messages.
-	public private(set) var buffer: [String] = []
+	public fileprivate(set) var buffer: [String] = []
 
 	// MARK: Initialization
 
@@ -17,7 +17,7 @@ public final class BufferOutputStream: OutputStreamType {
 
 	// MARK: OutputStreamType implementation
 
-	public func write(string: String) {
+	public func write(_ string: String) {
 		buffer.append(string)
 	}
 	
