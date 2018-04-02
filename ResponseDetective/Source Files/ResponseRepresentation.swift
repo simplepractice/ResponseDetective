@@ -28,7 +28,7 @@ public final class ResponseRepresentation {
 		return headers["Content-Type"].map({
 			$0.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 		}).map({
-			$0.substring(to: $0.range(of: ";")?.upperBound ?? $0.endIndex)
+			String($0[..<($0.range(of: ";")?.upperBound ?? $0.endIndex)])
 		})
 	}
 

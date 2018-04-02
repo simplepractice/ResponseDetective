@@ -4,7 +4,7 @@
 //  Copyright (c) 2015 Netguru Sp. z o.o. All rights reserved.
 //
 
-#import <libxml/tree.h>
+@import libxml2;
 #import "XMLPrettifying.h"
 
 NSString * __nullable rdv_prettifyXMLString(NSString * __nonnull string) {

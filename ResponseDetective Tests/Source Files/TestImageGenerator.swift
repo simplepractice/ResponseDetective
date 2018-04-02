@@ -39,15 +39,13 @@ internal struct TestImageGenerator {
 			}
 		#else
 			return Optional(generateImage(size: size)).flatMap({
-				$0.TIFFRepresentation
+				$0.tiffRepresentation
 			}).flatMap({
 				NSBitmapImageRep(data: $0)
 			}).flatMap({
 				switch type {
-					case .PNG:
-						return $0.representationUsingType(NSBitmapImageFileType.NSPNGFileType, properties: [
-							NSImageCompressionFactor: 1
-						])
+					case .png:
+						return $0.representation(using: .png, properties: [.compressionFactor: 1])
 				}
 			})!
 		#endif
@@ -72,7 +70,7 @@ internal struct TestImageGenerator {
 			let bounds = NSRect(x: 0, y: 0, width: size.width, height: size.height)
 			let image = NSImage(size: bounds.size)
 			image.lockFocus()
-			NSColor.blackColor().drawSwatchInRect(bounds)
+			NSColor.black.drawSwatch(in: bounds)
 			image.unlockFocus()
 			return image
 		#endif

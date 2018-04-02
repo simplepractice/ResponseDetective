@@ -44,7 +44,7 @@ public final class JSONInterceptor {
 		}).flatMap({
 			try? JSONSerialization.data(withJSONObject: $0, options: .prettyPrinted)
 		}).flatMap({
-			NSString(data: $0, encoding: String.Encoding.utf8.rawValue) as? String
+			String(data: $0, encoding: .utf8)
 		})
 	}
 
@@ -62,7 +62,7 @@ public final class JSONInterceptor {
 		}).flatMap({
 			try? JSONSerialization.data(withJSONObject: $0, options: .prettyPrinted)
 		}).flatMap({
-			NSString(data: $0, encoding: String.Encoding.utf8.rawValue) as? String
+			String(data: $0, encoding: .utf8)
 		})
 	}
 
