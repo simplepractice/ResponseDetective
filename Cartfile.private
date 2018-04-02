@@ -1,8 +1,0 @@
-#
-#  Cartfile.private
-#
-#  Copyright (c) 2015 Netguru Sp. z o.o. All rights reserved.
-#
-
-github "Quick/Quick" "v0.10.0"
-github "Quick/Nimble" "v5.1.1"
